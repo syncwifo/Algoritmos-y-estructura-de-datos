@@ -159,3 +159,49 @@ for dia in range(100):
         actual= actual.siguiente
   
     print(f"Día {dia+1}: Total infectados: {total_infectados}, Total no infectados: {total_no_infectados}, Total inmunes: {total_inmunes}")
+
+
+#crea el arbol binari
+
+class Nodo:
+    def __init__(self, persona):
+        self.persona = persona
+        self.izquierda = None
+        self.derecha = None
+
+def insertar(nodo, persona):
+    if nodo is None:
+        return Nodo(persona)
+    else:
+        if persona._id < nodo.persona._id:
+            nodo.izquierda = insertar(nodo.izquierda, persona)
+        else:
+            nodo.derecha = insertar(nodo.derecha, persona)
+    return nodo
+
+def imprimir_inorden(nodo):
+    if nodo:
+        imprimir_inorden(nodo.izquierda)
+        print(f"ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infección: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
+        imprimir_inorden(nodo.derecha)
+
+
+lista_personas_array = []
+actual = lista_personas.inicio
+while actual is not None:
+    lista_personas_array.append(actual.info)
+    actual = actual.siguiente
+
+
+personas_seleccionadas = random.sample(lista_personas_array, 300)
+
+
+for persona in personas_seleccionadas:
+    print(f"ID: {persona._id}, Nombre: {persona._nombre}, Apellido: {persona._apellido}, Familia: {persona.getFamilia()}, Estado de infección: {'Infectado' if persona.getEstado() == 'infectado' else 'No infectado' if persona.getEstado() == 'sano' else 'Inmune'}")
+
+raiz = None
+for persona in personas_seleccionadas:
+    raiz = insertar(raiz, persona)
+
+print("Árbol binario en orden:")
+imprimir_inorden(raiz)
