@@ -1,6 +1,10 @@
 import random
 import json
 
+#tomar tiempo
+import time
+
+
 #ARCHIVO CON INFORMACIO PARA LLENADO
 with open("datosnombres.json", "r") as f:
     data = json.load(f)
@@ -105,7 +109,7 @@ for i in range(1, 1001):
     insertar(lista_personas, persona)
 
 #SIMULACION 
-for dia in range(100): 
+for dia in range(30): 
     actual= lista_personas.inicio
     while actual is not None:
         persona= actual.info
@@ -129,7 +133,7 @@ for dia in range(100):
                     miembros_familia_infectados+= 1  
 
             temp= temp.siguiente
-            
+
         #INFECCION PROBABILIDAD Y AUMENT SI ESTA EN UNA FAMILIA  
         prob_infeccion= 0.1  
         if miembros_familia_infectados > miembros_familia_total / 2:
@@ -160,7 +164,6 @@ for dia in range(100):
   
     print(f"Día {dia+1}: Total infectados: {total_infectados}, Total no infectados: {total_no_infectados}, Total inmunes: {total_inmunes}")
 
-
 #crea el arbol binari
 
 class Nodo:
@@ -184,6 +187,46 @@ def imprimir_inorden(nodo):
         imprimir_inorden(nodo.izquierda)
         print(f"ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infección: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
         imprimir_inorden(nodo.derecha)
+##
+def buscar(nodo, id):
+    if nodo is None:
+        return None
+    elif nodo.persona._id == id:
+        return nodo
+    elif nodo.persona._id < id:
+        return buscar(nodo.derecha, id)
+    else:
+        return buscar(nodo.izquierda, id)
+    
+def agrupar_por_familia(nodo):
+    familias = {}
+    _agrupar_por_familia(nodo, familias)
+    return familias
+
+def _agrupar_por_familia(nodo, familias):
+    if nodo is None:
+        return
+
+    familia = nodo.persona.getFamilia()
+    if familia not in familias:
+        familias[familia] = []
+
+    estado = 'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'
+    familias[familia].append(estado)
+
+    _agrupar_por_familia(nodo.izquierda, familias)
+    _agrupar_por_familia(nodo.derecha, familias)
+##   
+def imprimir_por_nivel(raiz):
+    pendientes = Cola()
+    arribo(pendientes, raiz)
+    while(not esVacia(pendientes)):
+        nodo = atencion(pendientes)
+        print(f"ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infección: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
+        if(nodo.izquierda is not None):
+            arribo(pendientes,nodo.izquierda)
+        if(nodo.derecha is not None):
+            arribo(pendientes, nodo.derecha)
 
 
 lista_personas_array = []
@@ -205,3 +248,40 @@ for persona in personas_seleccionadas:
 
 print("Árbol binario en orden:")
 imprimir_inorden(raiz)
+
+BUSCAR=input("¿Que filtro nesecesita ingresar a la tabla? (id,familia)")
+if BUSCAR=="id":
+    id_buscar = int(input("Por favor, ingresa el ID que deseas buscar: "))
+    inicio = time.time()
+    nodo_encontrado = buscar(raiz, id_buscar)
+    fin = time.time()
+    print(f"El tiempo de ejecución fue: {fin - inicio} segundos")
+elif BUSCAR=="familia":
+    #familia_buscar=int(input("Por favor, ingresar el grupo familiar que deseas buscar: "))
+    #nodo_encontrado=buscar(raiz, familia_buscar)
+    pass
+
+if nodo_encontrado is not None:
+    print(f"Se encontró a la persona con ID: {nodo_encontrado.persona._id}, Nombre: {nodo_encontrado.persona._nombre}, Apellido: {nodo_encontrado.persona._apellido}, Familia: {nodo_encontrado.persona.getFamilia()}, Estado de infección: {'Infectado' if nodo_encontrado.persona.getEstado() == 'infectado' else 'No infectado' if nodo_encontrado.persona.getEstado() == 'sano' else 'Inmune'}")
+else:
+    print("No se encontró a ninguna persona con ese ID.")
+
+# busqueda a travez del tiempo para hacer pruebas
+id_buscar = int(input("Por favor, ingresa el ID que deseas buscar: "))
+inicio = time.time()
+nodo_encontrado = buscar(raiz, id_buscar)
+fin = time.time()
+a=fin - inicio
+print(f"El tiempo de ejecución de la búsqueda en el árbol binario fue: {a} segundos")
+
+inicio = time.time()
+persona_encontrada = None
+for persona in (lista_personas_array): 
+    if persona._id == id_buscar:
+        persona_encontrada = persona
+        break
+fin = time.time()
+b=(fin - inicio)
+print(f"El tiempo de ejecución de la búsqueda en la lista fue: {b} segundos")
+if a <b:
+    print("lista mas grande")
