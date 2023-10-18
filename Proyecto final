@@ -1,0 +1,539 @@
+import random
+import json
+
+#tomar tiempo
+import time
+
+class Vacuna(object):
+    def __init__(self):
+        self._elaborada= None
+        self._inyectadaA= None
+
+    def setElaborada(self, valor):
+        self._elaborada = valor
+
+    def setInyectada(self, valor):
+        self._inyectadaA = valor
+
+    def getInyectada(self):
+        return self._inyectadaA
+
+    def getElaborada(self):
+        return self._elaborada
+
+
+class Persona(object):
+    #grafo de personas familiares
+    def __init__(self):
+        self._id=None
+        self.__familia = None
+        self._nombre=None
+        self._apellido=None
+        self._estado="sano"
+        self._probInfeccion = 0
+        self.__vacuna = None
+        self.__diasInfectado = 0
+
+    def setProbInfeccion(self, prob):
+      self._probInfeccion = prob
+
+    def getProbInfeccion(self):
+      return self._probInfeccion
+
+    def setEstado(self, estado):
+      self._estado = estado
+
+    def getEstado(self):
+      return self._estado
+
+    def setFamilia(self, familia):
+      self.__familia = familia
+
+    def getFamilia(self):
+      return self.__familia
+
+    def setVacunado(self, estado):
+      self.__vacuna = estado
+    def getVacuna(self):
+      return self.__vacuna
+
+    def incrementarDiasInfectado(self):
+        if self.__vacuna != None:
+            self._estado = "inmune"
+        else:
+            if self._estado == "infectado":
+                self.__diasInfectado += 1
+                if self.__diasInfectado >= 10:
+                    self._estado = "inmune"
+            if self._estado == "inmune":
+                if self.__diasInfectado > 2:
+                    self.__diasInfectado -= 1
+            if self._estado == "inmune" and self.__diasInfectado > 0:
+                self._estado = "sano"
+
+
+
+class nodoCola(object):
+    info, siguiente =  None, None
+
+
+class Cola(object):
+    def __init__(self):
+        self.entrada, self.salida = None, None
+        self.tamanio = 0
+
+
+def arribo(cola, info):
+    nuevoNodo = nodoCola()
+    nuevoNodo.info = info
+    if cola.salida is None:
+        cola.salida = nuevoNodo
+    else:
+        cola.entrada.siguiente = nuevoNodo
+    cola.entrada = nuevoNodo
+    cola.tamanio += 1
+
+
+
+def atencion(cola):
+    info = cola.salida.info
+    cola.salida = cola.salida.siguiente
+    if cola.salida is None:
+        cola.entrada = None
+    cola.tamanio -= 1
+    return info
+
+
+def ColaEsVacia(cola):
+    return cola.entrada is None
+
+
+def recorrerYVacunar(cola, pila):
+    colaAuxiliar = Cola()
+
+    while not ColaEsVacia(cola):
+        info = atencion(cola)
+        if not PilaEsVacia(pila):
+            vacuna =desapilar(pila)
+            vacuna.setInyectada(info)
+            print(info.getEstado()," se inyecto a " ,info._nombre, info._id)
+            info.setVacunado(vacuna)
+            info.setEstado("inmune")
+
+        arribo(colaAuxiliar, info)
+
+    while not ColaEsVacia(colaAuxiliar):
+        info = atencion(colaAuxiliar)
+        arribo(cola, info)
+
+
+class nodoPila(object):
+    info, siguiente = None, None
+
+
+class Pila(object):
+    def __init__(self):
+        self.cima = None
+        self.tamanio = 0
+
+
+def apilar(pila, info):
+    nuevoNodo = nodoPila()
+    nuevoNodo.info = info
+    nuevoNodo.siguiente = pila.cima
+    pila.cima = nuevoNodo
+    pila.tamanio += 1
+
+
+def desapilar(pila):
+    info = pila.cima.info
+    pila.cima = pila.cima.siguiente
+    pila.tamanio -= 1
+    return info
+
+
+def PilaEsVacia(pila):
+    return pila.cima is None
+
+
+def imprimirPila(pila):
+    pilaAuxiliar = Pila()
+    while not PilaEsVacia(pila):
+        info = desapilar(pila)
+        print(info)
+        apilar(pilaAuxiliar, info)
+    while not PilaEsVacia(pilaAuxiliar):
+        info = desapilar(pilaAuxiliar)
+        apilar(pila, info)
+
+
+def enCima(pila):
+    if pila.cima is not None:
+        return pila.cima.info
+    else:
+        return None
+
+
+def arriboColaPrioritaria(cola, info2):
+    flag = False
+    arriboEspecialFlag = False
+    terceraFlag = False
+    if ColaEsVacia(cola):
+        arribo(cola, info2)
+    else:
+        colaAuxiliar = Cola()
+        while not ColaEsVacia(cola):
+            info = atencion(cola)
+            if info.getProbInfeccion() <= info2.getProbInfeccion() and flag is False:
+                arribo(colaAuxiliar, info2)
+                arribo(colaAuxiliar, info)
+                flag = True
+                terceraFlag = True
+
+            elif info.getProbInfeccion() > info2.getProbInfeccion():
+                arribo(colaAuxiliar, info)
+                arriboEspecialFlag = True
+            elif info.getProbInfeccion() <= info2.getProbInfeccion() and flag is True:
+                arribo(colaAuxiliar, info)
+            elif info.getProbInfeccion() <= info2.getProbInfeccion() and arriboEspecialFlag is True:
+                arribo(colaAuxiliar, info2)
+                arribo(colaAuxiliar, info)
+                flag = True
+                arriboEspecial = False
+                terceraFlag = True
+        if arriboEspecialFlag is True and terceraFlag is False:
+            arribo(colaAuxiliar, info2)
+        while not ColaEsVacia(colaAuxiliar):
+            info = atencion(colaAuxiliar)
+            arribo(cola, info)
+
+
+def imprimirCola(cola):
+    colaAuxiliar = Cola()
+    while not ColaEsVacia(cola):
+        info = atencion(cola)
+        print(info.getProbInfeccion())
+        arribo(colaAuxiliar, info)
+
+    while not ColaEsVacia(colaAuxiliar):
+        info = atencion(colaAuxiliar)
+        arribo(cola, info)
+
+# Nodo simplemente enlazado
+class nodoListaSimple(object):
+    info, siguiente = None, None
+
+
+class Lista(object):
+    def __init__(self):
+        self.inicio = None
+        self.tamanio = 0
+
+def insertarLista(lista, info):
+    nodo = nodoListaSimple()
+    nodo.info = info
+    if lista.inicio is None:
+        nodo.siguiente = lista.inicio
+        lista.inicio = nodo
+    else:
+        actual = lista.inicio
+        siguiente = lista.inicio.siguiente
+        while siguiente is not None:
+            actual = actual.siguiente
+            siguiente = siguiente.siguiente
+        nodo.siguiente = siguiente
+        actual.siguiente = nodo
+    lista.tamanio += 1
+
+def tamanio(lista):
+    return lista.tamanio
+
+def eliminar(lista, info):
+    data = None
+    # saber si es el primero de la lista
+    if(lista.inicio.info == info):
+        data = lista.inicio
+        lista.inicio = lista.inicio.siguiente
+        lista.tamanio -= 1
+    else:
+        actual = lista.inicio
+        siguiente = lista.inicio.siguiente
+        while (siguiente is not None and info != siguiente.info):
+            actual = actual.siguiente
+            siguiente = siguiente.siguiente
+        # saber si es el ultimo de la lista
+        if(siguiente is not None):
+            data = siguiente.info
+            actual.siguiente = siguiente.siguiente
+            lista.tamanio -= 1
+    return data
+
+#crea el arbol binari
+
+class Nodo:
+    def __init__(self, persona):
+        self.persona = persona
+        self.izquierda = None
+        self.derecha = None
+
+def insertar(nodo, persona):
+    if nodo is None:
+        return Nodo(persona)
+    else:
+        if persona._id < nodo.persona._id:
+            nodo.izquierda = insertar(nodo.izquierda, persona)
+        else:
+            nodo.derecha = insertar(nodo.derecha, persona)
+    return nodo
+
+def imprimir_inorden(nodo):
+    if nodo:
+        imprimir_inorden(nodo.izquierda)
+        print(f"ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
+        imprimir_inorden(nodo.derecha)
+##
+def buscar(nodo, id):
+    if nodo is None:
+        if nodo is None:
+            print(f"El usuario con ID: {id} ha sido eliminado.")
+        return None
+    elif nodo.persona._id == id:
+        return nodo
+    elif nodo.persona._id < id:
+        return buscar(nodo.derecha, id)
+    else:
+        return buscar(nodo.izquierda, id)
+
+def agrupar_por_familia(nodo):
+    familias = {}
+    _agrupar_por_familia(nodo, familias)
+    return familias
+
+def _agrupar_por_familia(nodo, familias):
+    if nodo is None:
+        return
+
+    familia = nodo.persona.getFamilia()
+    if familia not in familias:
+        familias[familia] = []
+
+    estado = 'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'
+    familias[familia].append(estado)
+
+    _agrupar_por_familia(nodo.izquierda, familias)
+    _agrupar_por_familia(nodo.derecha, familias)
+##
+def imprimir_por_nivel(raiz):
+    pendientes = Cola()
+    arribo(pendientes, raiz)
+    while(not ColaEsVacia(pendientes)):
+        nodo = atencion(pendientes)
+        print(f"ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
+        if(nodo.izquierda is not None):
+            arribo(pendientes,nodo.izquierda)
+        if(nodo.derecha is not None):
+            arribo(pendientes, nodo.derecha)
+#busqueda
+def buscar_por_familia(nodo, familia):
+    if nodo is None:
+        return []
+    elif nodo.persona.getFamilia() == familia:
+        return [nodo] + buscar_por_familia(nodo.derecha, familia) + buscar_por_familia(nodo.izquierda, familia)
+    elif nodo.persona.getFamilia() < familia:
+        return buscar_por_familia(nodo.derecha, familia)
+    else:
+        return buscar_por_familia(nodo.izquierda, familia)
+
+def buscar_por_nombre(nodo, nombre):
+    if nodo is None:
+        return []
+    elif nodo.persona._nombre == nombre:
+        return [nodo] + buscar_por_nombre(nodo.derecha, nombre) + buscar_por_nombre(nodo.izquierda, nombre)
+    else:
+        return buscar_por_nombre(nodo.derecha, nombre) + buscar_por_nombre(nodo.izquierda, nombre)
+
+def eliminar_por_id(lista_personas_array, id):
+    for i in range(len(lista_personas_array)):
+        if lista_personas_array[i]._id == id:
+            del lista_personas_array[i]
+            print(f"Eliminado ID: {id}")
+            break
+
+
+def start():
+    #ARCHIVO CON INFORMACIO PARA LLENADO
+    with open("datosnombres.json", "r") as f:
+        data = json.load(f)
+
+    nombres = data["nombres"]
+    apellidos = data["apellidos"]
+
+    lista_personas= Lista()
+
+    #crea a mil objetos y los inserta a lista
+
+    for i in range(1, 1001):
+        persona= Persona()
+        persona._id= i
+        persona._nombre= random.choice(nombres)
+        persona._apellido= random.choice(apellidos)
+        persona.setFamilia(random.randint(1,10))
+
+        if random.random() < (random.randint(1,10) / 100.0):
+          persona.setEstado("infectado")
+
+        insertarLista(lista_personas, persona)
+
+    #SIMULACION
+    pilaVacunas = Pila()
+
+    for dia in range(30):
+        actual= lista_personas.inicio
+        while actual is not None:
+            persona= actual.info
+
+            if persona.getEstado() != "sano":
+                persona.incrementarDiasInfectado()
+                actual= actual.siguiente
+                continue
+
+            miembros_familia_infectados= 0
+            miembros_familia_total= 0
+            temp= lista_personas.inicio
+
+            while temp is not None:
+                p_temp= temp.info
+
+                if p_temp.getFamilia() == persona.getFamilia():
+                    miembros_familia_total+= 1
+
+                    if p_temp.getEstado() == "infectado":
+                        miembros_familia_infectados+= 1
+
+                temp= temp.siguiente
+
+
+            #INFECCION PROBABILIDAD Y AUMENT SI ESTA EN UNA FAMILIA
+            probAzar = random.randint(0, 10000000) / 10000000
+            probEnfermo = random.randint(0, 10000000) /10000000
+
+            if miembros_familia_infectados > miembros_familia_total / 2:
+                probAzar += 0.04
+            elif miembros_familia_infectados > 0:
+                probAzar += 0.01
+            persona.setProbInfeccion(probAzar)
+            if probEnfermo < probAzar:
+                persona.setEstado("infectado")
+
+            actual= actual.siguiente
+
+        total_infectados= 0
+        total_no_infectados= 0
+        total_inmunes= 0
+
+        actual= lista_personas.inicio
+        #cola prioridad
+        colaPrioritaria = Cola()
+
+        while actual is not None:
+            persona = actual.info
+            #funciona pero aumenta la ram ocupada, es prioridad solo a los sanos
+            if persona.getEstado() == "sano":
+                arriboColaPrioritaria(colaPrioritaria, persona)
+                #print("Persona:", persona._id, " Tiene la prob", persona.getProbInfeccion())
+            actual = actual.siguiente
+        #recorre la cola y se crean 5 vacunas al día
+        for i in range(5):
+            vacuna = Vacuna()
+            vacuna.setElaborada(dia)
+            apilar(pilaVacunas, vacuna)
+        recorrerYVacunar(colaPrioritaria, pilaVacunas)
+        actual= lista_personas.inicio
+
+        while actual is not None:
+            persona= actual.info
+
+            if persona.getEstado() == "infectado":
+                total_infectados+= 1
+            elif persona.getEstado() == "sano":
+                total_no_infectados+= 1
+            else:
+                total_inmunes+= 1
+
+            actual= actual.siguiente
+
+        print(f"Dia {dia+1}: Total infectados: {total_infectados}, Total no infectados: {total_no_infectados}, Total inmunes: {total_inmunes}")
+
+
+    lista_personas_array = []
+    actual = lista_personas.inicio
+    while actual is not None:
+        lista_personas_array.append(actual.info)
+        actual = actual.siguiente
+
+
+    personas_seleccionadas = random.sample(lista_personas_array, 300)
+
+
+    for persona in personas_seleccionadas:
+        print(f"ID: {persona._id}, Nombre: {persona._nombre}, Apellido: {persona._apellido}, Familia: {persona.getFamilia()}, Estado de infeccion: {'Infectado' if persona.getEstado() == 'infectado' else 'No infectado' if persona.getEstado() == 'sano' else 'Inmune'}")
+
+    raiz = None
+    for persona in personas_seleccionadas:
+        raiz = insertar(raiz, persona)
+
+    print("Arbol binario en orden:")
+    imprimir_inorden(raiz)
+
+
+
+    while True:
+        accion = input("¿Que accion te gustaría realizar? (buscar, eliminar, salir): ")
+        if accion.lower() == "salir":
+            break
+
+        if accion.lower() == "buscar":
+            tipo_busqueda = input("¿Qué tipo de busqueda te gustaría realizar? (id, familia, nombre): ")
+            if tipo_busqueda.lower() == "id":
+                id_buscar = int(input("Por favor, ingresa el ID que deseas buscar: "))
+                nodo_encontrado = buscar(raiz, id_buscar)
+                if nodo_encontrado is not None:
+                    print(f"Se encontro a la persona con ID: {nodo_encontrado.persona._id}, Nombre: {nodo_encontrado.persona._nombre}, Apellido: {nodo_encontrado.persona._apellido}, Familia: {nodo_encontrado.persona.getFamilia()}, Estado de infección: {'Infectado' if nodo_encontrado.persona.getEstado() == 'infectado' else 'No infectado' if nodo_encontrado.persona.getEstado() == 'sano' else 'Inmune'}")
+                else:
+                    print("No se encontro a ninguna persona con ese ID.")
+            elif tipo_busqueda.lower() == "familia":
+                familia_buscar = int(input("Por favor, ingresa el número de la familia que deseas buscar: "))
+                nodos_encontrados = buscar_por_familia(raiz, familia_buscar)
+                for nodo in nodos_encontrados:
+                    print(f"Se encontro a la persona con ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
+            elif tipo_busqueda.lower() == "nombre":
+                nombre_buscar = input("Por favor, ingresa el nombre que deseas buscar: ")
+                nodos_encontrados = buscar_por_nombre(raiz, nombre_buscar)
+                for nodo in nodos_encontrados:
+                    print(f"Se encontro a la persona con ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
+
+        elif accion.lower() == "eliminar":
+            id_eliminar = int(input("Por favor, ingresa el ID de la persona que deseas eliminar: "))
+            eliminar_por_id(lista_personas_array, id_eliminar)
+
+    # busqueda para medir tiempo borrar si es nesesario
+    id_buscar = int(input("Por favor, ingresa el ID que deseas buscar: "))
+    inicio = time.time()
+    nodo_encontrado = buscar(raiz, id_buscar)
+    fin = time.time()
+    a=fin - inicio
+    print(f"El tiempo de ejecucion de la busqueda en el arbol binario fue: {a} segundos")
+
+    inicio = time.time()
+    persona_encontrada = None
+    for persona in (lista_personas_array):
+        if persona._id == id_buscar:
+            persona_encontrada = persona
+            break
+    fin = time.time()
+    b=(fin - inicio)
+    print(f"El tiempo de ejecucion de la busqueda en la lista fue: {b} segundos")
+    if a <b:
+        print("lista mas grande")
+
+start()
