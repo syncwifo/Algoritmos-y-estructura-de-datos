@@ -280,11 +280,12 @@ def insertar(nodo, persona):
     if nodo is None:
         return Nodo(persona)
     else:
-        if persona._id < nodo.persona._id:
+        if persona._id< nodo.persona._id:
             nodo.izquierda = insertar(nodo.izquierda, persona)
         else:
             nodo.derecha = insertar(nodo.derecha, persona)
     return nodo
+
 def insertar_familia(nodo, persona):
     if nodo is None:
         return Nodo(persona)
@@ -293,7 +294,16 @@ def insertar_familia(nodo, persona):
             nodo.izquierda = insertar_familia(nodo.izquierda, persona)
         else:
             nodo.derecha = insertar_familia(nodo.derecha, persona)
-        print("dsad")
+    return nodo
+
+def insertar_nombre(nodo, persona):
+    if nodo is None:
+        return Nodo(persona)
+    else:
+        if persona._nombre <= nodo.persona._nombre:
+            nodo.izquierda = insertar_nombre(nodo.izquierda, persona)
+        else:
+            nodo.derecha = insertar_nombre(nodo.derecha, persona)
     return nodo
 
 def imprimir_inorden(nodo):
@@ -304,8 +314,7 @@ def imprimir_inorden(nodo):
 ##
 def buscar(nodo, id):
     if nodo is None:
-        if nodo is None:
-            print(f"El usuario con ID: {id} ha sido eliminado.")
+        print(f"El usuario con ID: {id} ha sido eliminado.")
         return None
     elif nodo.persona._id == id:
         return nodo
@@ -314,25 +323,6 @@ def buscar(nodo, id):
     else:
         return buscar(nodo.izquierda, id)
 
-def agrupar_por_familia(nodo):
-    familias = {}
-    _agrupar_por_familia(nodo, familias)
-    return familias
-
-def _agrupar_por_familia(nodo, familias):
-    if nodo is None:
-        return
-
-    familia = nodo.persona.getFamilia()
-    if familia not in familias:
-        familias[familia] = []
-
-    estado = 'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'
-    familias[familia].append(estado)
-
-    _agrupar_por_familia(nodo.izquierda, familias)
-    _agrupar_por_familia(nodo.derecha, familias)
-##
 def imprimir_por_nivel(raiz):
     pendientes = Cola()
     arribo(pendientes, raiz)
@@ -366,7 +356,7 @@ def eliminar_por_id(lista_personas_array, id):
     for i in range(len(lista_personas_array)):
         if lista_personas_array[i]._id == id:
             del lista_personas_array[i]
-            print(f"Eliminado ID: {id}")
+            print(f"Eliminado ID: {id} o no se encuentra en la lista")
             break
 
 
@@ -397,7 +387,7 @@ def start():
     #SIMULACION
     pilaVacunas = Pila()
 
-    for dia in range(30):
+    for dia in range(5):
         actual= lista_personas.inicio
         while actual is not None:
             persona= actual.info
@@ -488,48 +478,56 @@ def start():
     for persona in personas_seleccionadas:
         print(f"ID: {persona._id}, Nombre: {persona._nombre}, Apellido: {persona._apellido}, Familia: {persona.getFamilia()}, Estado de infeccion: {'Infectado' if persona.getEstado() == 'infectado' else 'No infectado' if persona.getEstado() == 'sano' else 'Inmune'}")
 
-    raiz = None
-    pregunta=input("¿Quiere hacer el arbol por id?  (si, no)" )
-    if pregunta.lower() == "si":
-        for persona in personas_seleccionadas:
-            raiz = insertar(raiz, persona)     
-    else:
-        for persona in personas_seleccionadas:
-            raiz = insertar_familia(raiz, persona)
-
-    print("Arbol binario en orden:")
-    imprimir_inorden(raiz)
-
-
 
     while True:
-        accion = input("¿Que accion te gustaría realizar? (buscar, eliminar, salir): ")
+        raiz = None
+        accion = input("¿Que acciòn te gustaría realizar? (buscar, salir): ")
         if accion.lower() == "salir":
             break
 
         if accion.lower() == "buscar":
+            print("Dependiendo de su elecciòn se habilitara la busqueda")
             tipo_busqueda = input("¿Qué tipo de busqueda te gustaría realizar? (id, familia, nombre): ")
             if tipo_busqueda.lower() == "id":
+                for persona in personas_seleccionadas:
+                    raiz = insertar(raiz, persona)
+                print("Arbol binario en orden mediante ",accion, ":")
+                imprimir_inorden(raiz)
                 id_buscar = int(input("Por favor, ingresa el ID que deseas buscar: "))
                 nodo_encontrado = buscar(raiz, id_buscar)
                 if nodo_encontrado is not None:
                     print(f"Se encontro a la persona con ID: {nodo_encontrado.persona._id}, Nombre: {nodo_encontrado.persona._nombre}, Apellido: {nodo_encontrado.persona._apellido}, Familia: {nodo_encontrado.persona.getFamilia()}, Estado de infección: {'Infectado' if nodo_encontrado.persona.getEstado() == 'infectado' else 'No infectado' if nodo_encontrado.persona.getEstado() == 'sano' else 'Inmune'}")
                 else:
                     print("No se encontro a ninguna persona con ese ID.")
+                accion2=input("¿Desea eliminar algo del arbol? (si/no) ")
+                if accion2.lower()== "si":
+                    id_eliminar = int(input("Por favor, ingresa el ID de la persona que deseas eliminar: "))
+                    eliminar_por_id(lista_personas_array, id_eliminar)
+
+            
             elif tipo_busqueda.lower() == "familia":
+                for persona in personas_seleccionadas:
+                    raiz = insertar_familia(raiz, persona)
+                print("Arbol binario en orden mediante ",accion, ":")
+                imprimir_inorden(raiz)
+    
                 familia_buscar = int(input("Por favor, ingresa el número de la familia que deseas buscar: "))
                 nodos_encontrados = buscar_por_familia(raiz, familia_buscar)
                 for nodo in nodos_encontrados:
                     print(f"Se encontro a la persona con ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
+            
+            
             elif tipo_busqueda.lower() == "nombre":
+                for persona in personas_seleccionadas:
+                    raiz = insertar_nombre(raiz, persona)
+                print("Arbol binario en orden mediante ",accion, ":")
+                imprimir_inorden(raiz)
+
                 nombre_buscar = input("Por favor, ingresa el nombre que deseas buscar: ")
                 nodos_encontrados = buscar_por_nombre(raiz, nombre_buscar)
                 for nodo in nodos_encontrados:
                     print(f"Se encontro a la persona con ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
 
-        elif accion.lower() == "eliminar":
-            id_eliminar = int(input("Por favor, ingresa el ID de la persona que deseas eliminar: "))
-            eliminar_por_id(lista_personas_array, id_eliminar)
 
     # busqueda para medir tiempo borrar si es nesesario
     id_buscar = int(input("Por favor, ingresa el ID que deseas buscar: "))
