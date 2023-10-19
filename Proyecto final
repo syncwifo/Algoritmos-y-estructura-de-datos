@@ -492,11 +492,11 @@ def start():
     pregunta=input("¿Quiere hacer el arbol por id?  (si, no)" )
     if pregunta.lower() == "si":
         for persona in personas_seleccionadas:
-            raiz = insertar(raiz, persona)
-            
+            raiz = insertar(raiz, persona)     
     else:
         for persona in personas_seleccionadas:
             raiz = insertar_familia(raiz, persona)
+
     print("Arbol binario en orden:")
     imprimir_inorden(raiz)
 
