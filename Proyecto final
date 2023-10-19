@@ -499,10 +499,11 @@ def start():
                     print(f"Se encontro a la persona con ID: {nodo_encontrado.persona._id}, Nombre: {nodo_encontrado.persona._nombre}, Apellido: {nodo_encontrado.persona._apellido}, Familia: {nodo_encontrado.persona.getFamilia()}, Estado de infección: {'Infectado' if nodo_encontrado.persona.getEstado() == 'infectado' else 'No infectado' if nodo_encontrado.persona.getEstado() == 'sano' else 'Inmune'}")
                 else:
                     print("No se encontro a ninguna persona con ese ID.")
+
                 accion2=input("¿Desea eliminar algo del arbol? (si/no) ")
                 if accion2.lower()== "si":
                     id_eliminar = int(input("Por favor, ingresa el ID de la persona que deseas eliminar: "))
-                    eliminar_por_id(lista_personas_array, id_eliminar)
+                    eliminar_por_id(personas_seleccionadas, id_eliminar)
 
             
             elif tipo_busqueda.lower() == "familia":
