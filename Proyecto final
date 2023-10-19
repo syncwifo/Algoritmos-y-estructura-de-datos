@@ -514,9 +514,15 @@ def start():
     
                 familia_buscar = int(input("Por favor, ingresa el número de la familia que deseas buscar: "))
                 nodos_encontrados = buscar_por_familia(raiz, familia_buscar)
-                for nodo in nodos_encontrados:
-                    print(f"Se encontro a la persona con ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
-            
+                lista_encontrados_familia = []
+                if nodos_encontrados is not None:
+                    for nodo in nodos_encontrados:
+                        a = f"Se encontro las personas con Familia: {nodo.persona.getFamilia()}, ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}"
+                        print(a)
+                        lista_encontrados_familia.append(a)
+                if not lista_encontrados_familia:
+                    print("No se encontro a ninguna persona con esa familia.")
+
             
             elif tipo_busqueda.lower() == "nombre":
                 for persona in personas_seleccionadas:
@@ -526,9 +532,13 @@ def start():
 
                 nombre_buscar = input("Por favor, ingresa el nombre que deseas buscar: ")
                 nodos_encontrados = buscar_por_nombre(raiz, nombre_buscar)
+                lista_encontrados_nombre = []
                 for nodo in nodos_encontrados:
-                    print(f"Se encontro a la persona con ID: {nodo.persona._id}, Nombre: {nodo.persona._nombre}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()}, Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}")
-
+                    a = f"Se encontro las personas con nombre: {nodo.persona._nombre}, ID: {nodo.persona._id}, Apellido: {nodo.persona._apellido}, Familia: {nodo.persona.getFamilia()} Estado de infeccion: {'Infectado' if nodo.persona.getEstado() == 'infectado' else 'No infectado' if nodo.persona.getEstado() == 'sano' else 'Inmune'}"
+                    print(a)
+                    lista_encontrados_nombre.append(a)
+                if not lista_encontrados_nombre:
+                    print("No se encontro a ninguna persona con ese nombre.")
 
     # busqueda para medir tiempo borrar si es nesesario
     id_buscar = int(input("Por favor, ingresa el ID que deseas buscar: "))
