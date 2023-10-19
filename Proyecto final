@@ -285,6 +285,16 @@ def insertar(nodo, persona):
         else:
             nodo.derecha = insertar(nodo.derecha, persona)
     return nodo
+def insertar_familia(nodo, persona):
+    if nodo is None:
+        return Nodo(persona)
+    else:
+        if persona.getFamilia() <= nodo.persona.getFamilia():
+            nodo.izquierda = insertar_familia(nodo.izquierda, persona)
+        else:
+            nodo.derecha = insertar_familia(nodo.derecha, persona)
+        print("dsad")
+    return nodo
 
 def imprimir_inorden(nodo):
     if nodo:
