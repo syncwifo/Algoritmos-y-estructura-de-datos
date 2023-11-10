@@ -1,0 +1,49 @@
+import random
+import time
+#Ejecute los codigos de forma independiende al pc utilizado ya que no podia procesar mas de 100, es decir se quedaba en pausa el codigo
+def datos(x, lista):
+    for i in range(x):
+        numero_aleatorio = random.randint(1, 100)
+        lista.append(numero_aleatorio)
+
+def ordenamientoRapido(lista, primero, ultimo):
+    izquierda = primero
+    derecha = ultimo - 1
+    pivote = ultimo
+    while izquierda < derecha:
+        while lista[izquierda] < lista[pivote] and izquierda <= derecha:
+            izquierda += 1
+        while lista[derecha] > lista[pivote] and derecha >= izquierda:
+            derecha -= 1
+        if izquierda < derecha:
+            aux = lista[izquierda]
+            lista[izquierda] = lista[derecha]
+            lista[derecha] = aux
+    if lista[pivote] < lista[izquierda]:
+        aux = lista[izquierda]
+        lista[izquierda] = lista[pivote]
+        lista[pivote] = aux
+    if primero < izquierda:
+        ordenamientoRapido(lista, primero, izquierda - 1)
+    if ultimo > izquierda:
+        ordenamientoRapido(lista, izquierda + 1, ultimo)
+         
+
+j = 0
+x = 100
+data_fast_ordenamiento = []
+lista = []
+datos(x, lista)
+i=0
+while i < 10:
+    
+    inicio = time.time()
+    ordenamientoRapido(lista, 0, len(lista)-1)
+    final = time.time()
+    duracion = final - inicio    
+    data_fast_ordenamiento.append(duracion)  
+    i = i + 1
+print("DATOS", x)
+print("tiempo", data_fast_ordenamiento)
+x = x * 10
+j = j + 1
