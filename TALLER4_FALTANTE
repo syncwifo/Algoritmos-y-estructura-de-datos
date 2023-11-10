@@ -47,3 +47,54 @@ print("DATOS", x)
 print("tiempo", data_fast_ordenamiento)
 x = x * 10
 j = j + 1
+
+######
+def mezcla(izquierda, derecha):
+    resultado = []
+    while len(izquierda) > 0 and len(derecha) > 0:
+        if izquierda[0] <= derecha[0]:
+            resultado.append(izquierda[0])
+            izquierda.pop(0)
+        else:
+            resultado.append(derecha[0])
+            derecha.pop(0)
+    if len(izquierda) > 0:
+        resultado += izquierda
+    if len(derecha) > 0:
+        resultado += derecha
+    return resultado
+
+def ordenamientoMezcla(lista):
+    if len(lista) <= 1:
+        return lista
+    else:
+        medio = len(lista) // 2
+        izquierda = lista[:medio]
+        derecha = lista[medio:]
+        izquierda = ordenamientoMezcla(izquierda)
+        derecha = ordenamientoMezcla(derecha)
+        if izquierda[-1] <= derecha[0]:
+            izquierda += derecha
+            return izquierda
+        resultado = mezcla(izquierda, derecha)
+        return resultado
+
+x = 10
+j = 0
+while j < 5:
+    i = 0
+    print("Esta es la ejecución de mezcla ", j)
+
+    data_mezcla_orden = []
+    while i < 10:
+        lista = datos(x)
+        inicio = time.time()
+        lista = ordenamientoMezcla(lista)
+        final = time.time()
+        duracion = final - inicio    
+        data_mezcla_orden.append(duracion)
+        i = i + 1
+    print("El tamaño de los datos es", x)
+    print(data_mezcla_orden)
+    x = x * 10
+    j = j + 1
