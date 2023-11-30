@@ -1,5 +1,7 @@
 import heapq
 import random   
+import networkx as nx
+import matplotlib.pyplot as plt
 
 def calcular_diferencias_precios(supermercados):
     grafo = {supermercado: {} for supermercado in supermercados}
@@ -12,6 +14,7 @@ def calcular_diferencias_precios(supermercados):
 def dijkstra(grafo, inicio):
     distancias = {supermercado: float('infinity') for supermercado in grafo}
     distancias[inicio] = 0
+    caminos = {supermercado: [] for supermercado in grafo}
     cola_prioridad = [(0, inicio)]
     while cola_prioridad:
         distancia_actual, supermercado_actual = heapq.heappop(cola_prioridad)
@@ -21,8 +24,20 @@ def dijkstra(grafo, inicio):
             distancia_candidata = distancia_actual + distancia
             if distancia_candidata < distancias[vecino]:
                 distancias[vecino] = distancia_candidata
+                caminos[vecino] = caminos[supermercado_actual] + [supermercado_actual]
                 heapq.heappush(cola_prioridad, (distancia_candidata, vecino))
-    return distancias
+    return distancias, caminos
+
+def dibujar_grafo(grafo):
+    G = nx.Graph()
+    for supermercado, vecinos in grafo.items():
+        for vecino, peso in vecinos.items():
+            G.add_edge(supermercado, vecino, weight=peso)
+    pos = nx.spring_layout(G)  
+    nx.draw(G, pos, with_labels=True)  
+    labels = nx.get_edge_attributes(G, 'weight')
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=labels) 
+    plt.show()
 
 supermercados = {
     'A': random.randint(1000, 2000),
@@ -31,14 +46,23 @@ supermercados = {
     'D': random.randint(1000, 2000),
     'E': random.randint(1000, 2000),
     'F': random.randint(1000, 2000),
-    'G': random.randint(1000, 2000),
+    'G': random.randint(1500, 2000),
     'H': random.randint(1000, 2000),
     'I': random.randint(1000, 2000),
     'J': random.randint(1000, 2000),
 }
 
 grafo = calcular_diferencias_precios(supermercados)
-inicio = 'A' 
-distancias = dijkstra(grafo, inicio)
+inicio = 'G' 
+distancias, caminos = dijkstra(grafo, inicio)
 
-print(distancias)
+supermercados_ordenados = sorted(distancias.items(), key=lambda x: x[1])
+
+for i in range(3):
+    supermercado, precio = supermercados_ordenados[i]
+    camino = caminos[supermercado] + [supermercado]
+    print(f"El supermercado mas barato {i+1} es {supermercado} con una diferencia de precio de {precio}")
+    print(f"El camino al supermercado mas barato {i+1} es {' -> '.join(camino)}")
+
+dibujar_grafo(grafo)
+
