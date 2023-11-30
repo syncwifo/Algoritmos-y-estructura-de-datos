@@ -1,0 +1,110 @@
+from heap import *
+import random
+import time
+
+def busqueda_secuencial(arreglo, valor, izquierda, derecha):
+
+    for i in range(izquierda, derecha + 1):
+        if arreglo[i] == valor:
+            return i
+    return -1
+
+def busqueda_binaria_iterativa(arreglo, valor, izquierda, derecha):
+    while izquierda <= derecha:
+        medio = (izquierda + derecha) // 2
+        if arreglo[medio] == valor:
+            return medio
+        elif arreglo[medio] > valor:
+            derecha = medio - 1
+        else:
+           izquierda = medio + 1
+    return -1
+
+def busqueda_binaria_recursiva(arreglo, valor, izquierda, derecha):
+    if izquierda > derecha:
+        return -1
+    
+    medio = (izquierda + derecha) // 2
+    if arreglo[medio] == valor:
+        return medio
+    elif arreglo[medio] > valor:
+        return busqueda_binaria_recursiva(arreglo, valor, izquierda, medio - 1)
+    else:
+        return busqueda_binaria_recursiva(arreglo, valor, medio + 1, derecha)
+x=1
+while x<2:  #cambia a 8
+    i=1
+    cantidad_datos = 10**x
+    print(cantidad_datos)
+    while i<2:      #cambia a 10
+        lista = []
+        for _ in range(cantidad_datos):
+            lista.append(random.randint(1, 1000))
+
+
+        heap = Heap(cantidad_datos)
+        heap.tamanio = cantidad_datos
+        heap.vector =lista
+
+        inicio=time.time()
+        monticulizar(heap)
+        HeapSort(heap)
+        final=time.time()
+        tiempo=final-inicio
+        #print(heap.vector)
+        print(tiempo)
+        i+=1
+    x+=1
+
+#Punto 2 educandus
+i=1
+
+while i<5:
+    x=1
+    tiempo_secuencial=[]
+    tiempo_iterativo=[]
+    tiempo_binario=[]
+    if i==1:
+        busqueda=1
+    if i==2:
+        busqueda=500
+    if i==3:
+        busqueda=1000
+    if i==4:
+        busqueda=(random.randint(1,1000))
+    while x<6:
+        lista = []
+        cantidad_datos=100000
+        for _ in range(cantidad_datos):
+            lista.append(random.randint(1, 1000))
+        heap = Heap(cantidad_datos)
+        heap.tamanio = cantidad_datos
+        heap.vector =lista
+
+        monticulizar(heap)
+        HeapSort(heap)
+
+        inicio=time.time()
+        indice_secuencial = busqueda_secuencial(heap.vector, busqueda, 0, heap.tamanio - 1)
+        final=time.time()
+        tiempo=(final-inicio)
+        tiempo_secuencial.append(tiempo)
+
+        inicio=time.time()
+        indice_binario_iterativo = busqueda_binaria_iterativa(heap.vector, 500, 0, heap.tamanio - 1)
+        final=time.time()
+        tiempo=(final-inicio)
+        tiempo_iterativo.append(tiempo)
+
+        inicio=time.time()
+        indice_binario_recursivo = busqueda_binaria_recursiva(heap.vector, 500, 0, heap.tamanio - 1)
+        final=time.time()
+        tiempo=(final-inicio) 
+        tiempo_binario.append(tiempo)
+
+        x+=1
+    print("            Serie ", i,"   Busqueda ", busqueda)
+    print("Secuencial: ", tiempo_secuencial)
+    print("Binario: ", tiempo_binario)
+    print("Iterativo: ",tiempo_iterativo)
+    i+=1
