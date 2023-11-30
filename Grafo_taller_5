@@ -1,1 +1,44 @@
-#
+import heapq
+import random   
+
+def calcular_diferencias_precios(supermercados):
+    grafo = {supermercado: {} for supermercado in supermercados}
+    for supermercado1 in supermercados:
+        for supermercado2 in supermercados:
+            if supermercado1 != supermercado2:
+                grafo[supermercado1][supermercado2] = abs(supermercados[supermercado1] - supermercados[supermercado2])
+    return grafo
+
+def dijkstra(grafo, inicio):
+    distancias = {supermercado: float('infinity') for supermercado in grafo}
+    distancias[inicio] = 0
+    cola_prioridad = [(0, inicio)]
+    while cola_prioridad:
+        distancia_actual, supermercado_actual = heapq.heappop(cola_prioridad)
+        if distancia_actual != distancias[supermercado_actual]:
+            continue
+        for vecino, distancia in grafo[supermercado_actual].items():
+            distancia_candidata = distancia_actual + distancia
+            if distancia_candidata < distancias[vecino]:
+                distancias[vecino] = distancia_candidata
+                heapq.heappush(cola_prioridad, (distancia_candidata, vecino))
+    return distancias
+
+supermercados = {
+    'A': random.randint(1000, 2000),
+    'B': random.randint(1000, 2000),
+    'C': random.randint(1000, 2000),
+    'D': random.randint(1000, 2000),
+    'E': random.randint(1000, 2000),
+    'F': random.randint(1000, 2000),
+    'G': random.randint(1000, 2000),
+    'H': random.randint(1000, 2000),
+    'I': random.randint(1000, 2000),
+    'J': random.randint(1000, 2000),
+}
+
+grafo = calcular_diferencias_precios(supermercados)
+inicio = 'A' 
+distancias = dijkstra(grafo, inicio)
+
+print(distancias)
